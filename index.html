@@ -134,11 +134,36 @@ function renderGames(){
  document.querySelector("#empty").hidden=visible.length!==0;
 }
 function playGame(g){
- document.querySelector("#playing").textContent=g.name;
- document.querySelector("#frame").src=g.url;
- document.querySelector("#player").classList.add("open");
- document.querySelector("#note").textContent="Loading "+g.name+". If the host blocks embedding, open its official game page in a new tab.";
- document.querySelector("#player").scrollIntoView({behavior:"smooth",block:"start"});
+ function playGame(g) {
+  const player = document.querySelector("#player");
+  const frame = document.querySelector("#frame");
+  const note = document.querySelector("#note");
+
+  document.querySelector("#playing").textContent = g.name;
+
+  frame.src = g.url;
+  player.classList.add("open");
+
+  note.replaceChildren();
+
+  const message = document.createElement("span");
+  message.textContent =
+    "Loading " + g.name +
+    ". If it does not appear, the game may block embedding. ";
+
+  const link = document.createElement("a");
+  link.href = g.url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.textContent = "Open game in a new tab ↗";
+  link.style.color = "#b7aaff";
+
+  note.append(message, link);
+
+  player.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 }
 search.addEventListener("input",renderGames);
 document.querySelector("#clear").onclick=()=>{search.value="";active="All";renderFilters();renderGames();search.focus()};
