@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090b12">
+<title>GameHub | Play Something</title>
+<style>
+:root{color-scheme:dark;--bg:#090b12;--panel:#121622;--muted:#929bb0;--accent:#8b78ff;--line:#242b3b}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#191a38 0, var(--bg) 55%);color:#f7f7ff;font:15px system-ui,sans-serif;min-height:100vh}
+header{max-width:1200px;margin:auto;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{font-size:24px;font-weight:900;letter-spacing:-1px}.logo span{color:var(--accent)}
+.tag{color:var(--muted);font-size:12px}
+main{max-width:1200px;margin:auto;padding:12px 24px 70px}
+.hero{padding:36px 0 28px;max-width:720px}
+.eyebrow{color:#b7aaff;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:2px}
+h1{font-size:clamp(38px,7vw,68px);line-height:1.03;letter-spacing:-3px;margin:14px 0}
+.hero p{color:var(--muted);line-height:1.7;max-width:530px}
+.search{display:flex;gap:10px;margin-top:22px}
+input{min-width:0;flex:1;background:var(--panel);border:1px solid var(--line);padding:15px 17px;border-radius:12px;color:white;font:inherit;outline:none}
+input:focus{border-color:var(--accent)}
+button,.chip{border:1px solid var(--line);background:#171b2a;color:#e8e7ff;padding:10px 14px;border-radius:10px;font:inherit;cursor:pointer}
+button:hover,.chip.active{background:var(--accent);border-color:var(--accent);color:white}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:32px 0 16px}
+h2{font-size:21px;letter-spacing:-.5px;margin:0}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.game{border:1px solid var(--line);background:linear-gradient(145deg,#171b2a,#10131c);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .18s,border-color .18s}
+.game:hover{transform:translateY(-3px);border-color:#7669d9}
+.cover{height:140px;display:grid;place-items:center;font-size:53px;background:radial-gradient(circle at 30% 20%,#34325e,#171b2a 70%)}
+.game:nth-child(4n+2) .cover{background:radial-gradient(circle at 70% 30%,#4b2e50,#171b2a 70%)}
+.game:nth-child(4n+3) .cover{background:radial-gradient(circle at 40% 30%,#20504b,#171b2a 70%)}
+.game:nth-child(4n+4) .cover{background:radial-gradient(circle at 70% 30%,#58452b,#171b2a 70%)}
+.info{padding:14px}.info h3{font-size:15px;margin:0 0 6px}.info p{color:var(--muted);font-size:12px;margin:0 0 13px}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pill{font-size:10px;color:#c5bcff;background:#292344;border-radius:20px;padding:5px 8px}
+.play{font-size:12px;padding:7px 10px}
+.empty{color:var(--muted);padding:30px 0}
+.player{display:none;margin-top:32px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+.player.open{display:block}
+.player-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.player iframe{width:100%;height:min(68vh,650px);min-height:350px;background:#05060a;border:0;border-radius:10px}
+.player-note{color:var(--muted);font-size:12px;line-height:1.6}
+footer{border-top:1px solid var(--line);padding:24px;color:var(--muted);text-align:center;font-size:12px}
+@media(max-width:850px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.cover{height:125px}}
+@media(max-width:600px){header{padding:18px 16px}main{padding:8px 16px 48px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.cover{height:112px;font-size:43px}.info{padding:11px}.hero{padding-top:24px}h1{letter-spacing:-2px}.tag{display:none}.player iframe{min-height:300px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">GAME<span>HUB</span></div>
+  <div class="tag">YOUR NEXT GAME STARTS HERE</div>
+</header>
+<main>
+  <section class="hero">
+    <div class="eyebrow">THE ARCADE IS OPEN</div>
+    <h1>Less scrolling.<br>More playing.</h1>
+    <p>Find your next favourite game. Browse the arcade, pick a category and play supported games right here.</p>
+    <div class="search">
+      <input id="search" type="search" placeholder="Search games..." aria-label="Search games">
+      <button id="clear">Clear</button>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <h2>Explore the arcade</h2>
+    <span class="tag" id="count"></span>
+  </div>
+  <div class="filters" id="filters"></div>
+  <section class="grid" id="games"></section>
+  <p id="empty" class="empty" hidden>No games found. Try another search.</p>
+
+  <section class="player" id="player">
+    <div class="player-head">
+      <div><div class="tag">NOW PLAYING</div><h2 id="playing">Game</h2></div>
+      <button id="close">Close player ✕</button>
+    </div>
+    <iframe id="frame" title="Game player" allow="fullscreen; gamepad; autoplay" allowfullscreen></iframe>
+    <p class="player-note" id="note">If the game does not load, its host might block embedding. Use the game's official page where permitted.</p>
+  </section>
+</main>
+<footer>GAMEHUB · Independent browser arcade · More games coming</footer>
+
+<script>
+const games = [
+ {name:"PolyTrack",genre:"Racing",icon:"🏎️",desc:"Low-poly time-trial racing",url:"https://polytrack.totallynormal.net/"},
+ {name:"Idle Breakout",genre:"Idle",icon:"🧱",desc:"Break bricks and upgrade",url:"https://idle-breakout.github.io/"},
+ {name:"2048",genre:"Puzzle",icon:"🔢",desc:"Combine tiles to reach 2048",url:"https://2048game.com/"},
+ {name:"Google Snake",genre:"Arcade",icon:"🐍",desc:"Classic snake action",url:"https://www.google.com/fbx?fbx=snake_arcade"},
+ {name:"Hextris",genre:"Puzzle",icon:"🔷",desc:"Fast-paced hexagon puzzle",url:"https://hextris.io/"},
+ {name:"Pac-Man",genre:"Arcade",icon:"🟡",desc:"Classic maze-chase style",url:"https://www.google.com/logos/2010/pacman10-i.html"},
+ {name:"Cookie Clicker",genre:"Idle",icon:"🍪",desc:"Build your cookie empire",url:"https://orteil.dashnet.org/cookieclicker/"},
+ {name:"Tetris",genre:"Puzzle",icon:"🟪",desc:"Stack falling blocks",url:"https://tetris.com/play-tetris"},
+ {name:"Slope",genre:"Arcade",icon:"🔴",desc:"Roll down a twisting track",url:"https://slope-game.github.io/"},
+ {name:"Krunker",genre:"Action",icon:"🎯",desc:"Browser-based multiplayer action",url:"https://krunker.io/"},
+ {name:"Minesweeper",genre:"Puzzle",icon:"💣",desc:"Clear the grid carefully",url:"https://minesweeper.online/"},
+ {name:"Little Alchemy 2",genre:"Puzzle",icon:"🧪",desc:"Combine elements to discover more",url:"https://littlealchemy2.com/"}
+];
+const categories=["All","Arcade","Racing","Puzzle","Idle","Action"];
+let active="All";
+const grid=document.querySelector("#games");
+const filters=document.querySelector("#filters");
+const search=document.querySelector("#search");
+function renderFilters(){
+ filters.innerHTML="";
+ categories.forEach(cat=>{
+  const b=document.createElement("button");
+  b.className="chip"+(active===cat?" active":"");
+  b.textContent=cat;
+  b.onclick=()=>{active=cat;renderFilters();renderGames()};
+  filters.appendChild(b);
+ });
+}
+function renderGames(){
+ const q=search.value.trim().toLowerCase();
+ const visible=games.filter(g=>(active==="All"||g.genre===active)&&(g.name+" "+g.genre+" "+g.desc).toLowerCase().includes(q));
+ grid.innerHTML="";
+ visible.forEach(g=>{
+  const card=document.createElement("article");
+  card.className="game";
+  card.tabIndex=0;
+  card.innerHTML=`<div class="cover" aria-hidden="true">${g.icon}</div><div class="info"><h3></h3><p></p><div class="meta"><span class="pill"></span><button class="play">Play ↗</button></div></div>`;
+  card.querySelector("h3").textContent=g.name;
+  card.querySelector(".info p").textContent=g.desc;
+  card.querySelector(".pill").textContent=g.genre;
+  const launch=()=>playGame(g);
+  card.onclick=launch;
+  card.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();launch()}};
+  grid.appendChild(card);
+ });
+ document.querySelector("#count").textContent=visible.length+" games";
+ document.querySelector("#empty").hidden=visible.length!==0;
+}
+function playGame(g){
+ document.querySelector("#playing").textContent=g.name;
+ document.querySelector("#frame").src=g.url;
+ document.querySelector("#player").classList.add("open");
+ document.querySelector("#note").textContent="Loading "+g.name+". If the host blocks embedding, open its official game page in a new tab.";
+ document.querySelector("#player").scrollIntoView({behavior:"smooth",block:"start"});
+}
+search.addEventListener("input",renderGames);
+document.querySelector("#clear").onclick=()=>{search.value="";active="All";renderFilters();renderGames();search.focus()};
+document.querySelector("#close").onclick=()=>{document.querySelector("#frame").src="about:blank";document.querySelector("#player").classList.remove("open")};
+renderFilters();
+renderGames();
+</script>
+</body>
+</html>
